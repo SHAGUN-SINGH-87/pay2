@@ -1,3 +1,119 @@
+# Payload CMS Workflow System
+
+## Overview
+
+This project implements a custom workflow management system using Payload CMS, TypeScript, and MongoDB.
+It enables structured approval workflows for blog content, allowing documents to move through different stages: Draft → Review → Approval → Rejection.
+
+The system provides:
+
+- Configurable multi-step workflows
+- Role-based workflow stages
+- Blog workflow integration
+- Workflow activity logging
+- Custom API endpoints
+- Payload CMS plugin architecture
+
+---
+
+## Features
+
+### Workflow Configuration
+
+Administrators can define workflows with multiple steps. Each workflow includes:
+
+- Workflow Name
+- Target Collection
+- Workflow Steps (Step Name, Step Type, Assigned Role, Condition, SLA)
+
+### Blog Workflow Integration
+
+Blogs are connected to workflows via:
+
+- Workflow reference
+- Current step
+- Status: Draft | Review | Approved | Rejected
+
+Workflow hooks update the current workflow step automatically.
+
+### Workflow Logging
+
+All workflow actions are stored in WorkflowLogs:
+
+- Workflow ID
+- Document ID
+- Collection
+- Step
+- User
+- Action
+- Comment
+- Timestamp
+
+This creates a full audit trail.
+
+### Workflow API
+
+Endpoints:
+
+- POST `/api/workflows/trigger`– Trigger workflow for a document
+- GET `/api/workflows/status/:docId`– Get workflow logs for a document
+
+### Plugin Architecture
+
+The workflow logic is modular and reusable via a custom Payload CMS plugin.
+
+---
+
+## Project Structure
+src
+│
+├ collections
+│ ├ Blogs.ts
+│ ├ Media.ts
+│ ├ Users.ts
+│ ├ Workflows.ts
+│ └ WorkflowLogs.ts
+│
+├ hooks
+│ └ workflowHook.ts
+│
+├ plugins
+│ └ workflowPlugin.ts
+│
+├ api
+│ └ workflows.ts
+│
+├ admin
+│ └ components
+│ └ WorkflowPanel.tsx
+│
+└ payload.config.ts
+
+
+---
+
+## Technology Stack
+
+Backend:Payload CMS, TypeScript, Node.js  
+Database: MongoDB  
+Editor: Lexical Rich Text Editor  
+Other Tools:Sharp (image processing)
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/SHAGUN-SINGH-87/pay2.git
+cd workflow-system
+npm install
+
+##-------------------------------------------##
+## Payload Readme
+
+
 # Payload Blank Template
 
 This template comes configured with the bare minimum to get started on anything you need.
