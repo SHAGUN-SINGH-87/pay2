@@ -129,6 +129,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name: string;
+  role: 'admin' | 'reviewer' | 'editor';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -177,9 +179,9 @@ export interface Workflow {
   targetCollection: string;
   steps?:
     | {
-        stepName?: string | null;
-        stepType?: ('approval' | 'review' | 'sign-off' | 'comment-only') | null;
-        assignedRole?: string | null;
+        stepName: string;
+        stepType: 'approval' | 'review' | 'sign-off' | 'comment-only';
+        assignedRole: 'admin' | 'reviewer' | 'editor';
         condition?: string | null;
         slaHours?: number | null;
         id?: string | null;
@@ -195,13 +197,14 @@ export interface Workflow {
 export interface WorkflowLog {
   id: string;
   workflow?: (string | null) | Workflow;
-  documentId?: string | null;
-  collection?: string | null;
-  step?: string | null;
+  documentId: string;
+  collection: string;
+  step: string;
   user?: (string | null) | User;
-  action?: string | null;
+  action: string;
   comment?: string | null;
   timestamp?: string | null;
+  assignedTo?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -308,6 +311,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -376,6 +381,7 @@ export interface WorkflowLogsSelect<T extends boolean = true> {
   action?: T;
   comment?: T;
   timestamp?: T;
+  assignedTo?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -68,26 +68,30 @@ The workflow logic is modular and reusable via a custom Payload CMS plugin.
 src
 │
 ├ collections
-│ ├ Blogs.ts
-│ ├ Media.ts
-│ ├ Users.ts
-│ ├ Workflows.ts
-│ └ WorkflowLogs.ts
+│   ├ Blogs.ts           # Blog content collection
+│   ├ Media.ts           # Media / file uploads collection
+│   ├ Users.ts           # Users collection with roles (admin, reviewer)
+│   ├ Workflows.ts       # Workflow definitions
+│   └ WorkflowLogs.ts    # Logs for workflow actions
 │
 ├ hooks
-│ └ workflowHook.ts
+│   └ workflowHook.ts    # Hook to auto-update workflow steps on status change
 │
 ├ plugins
-│ └ workflowPlugin.ts
+│   └ workflowPlugin.ts  # Custom Payload plugin for workflow automation
 │
 ├ api
-│ └ workflows.ts
+│   └ workflows.ts       # Custom API endpoints (trigger workflow, get status)
 │
 ├ admin
-│ └ components
-│ └ WorkflowPanel.tsx
+│   └ components
+│       ├ WorkflowPanel.tsx   # Admin panel for workflow tracking
+│       └ ReviewerPanel.tsx   # Reviewer panel for assigned tasks
 │
-└ payload.config.ts
+├ reviewer
+│   └ page.tsx          # Reviewer dashboard page
+│
+└ payload.config.ts     # Payload CMS configuration file
 
 
 ---
