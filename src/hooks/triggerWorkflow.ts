@@ -1,47 +1,57 @@
-import payload from "payload";
+// src/hooks/triggerWorkflow.ts
+import { Payload } from "payload"
 
-interface Doc {
-  id: string;
-}
+export default async function triggerWorkflow(args: {
+  doc: any
+  previousDoc: any
+  req: any // PayloadRequest type
+}) {
+  const { doc, req } = args
+  const payload: Payload = req.payload
 
-interface Collection {
-  slug: string;
-}
+  if (!doc.workflow) return
 
-interface TriggerWorkflowArgs {
-  doc: Doc;
-  collection: Collection;
-}
+  // Get workflow configuration
+  const workflow = await payload.findByID({
+    collection: "workflows",
+    id: doc.workflow,
+  })
 
-const triggerWorkflow = async ({ doc, collection }: TriggerWorkflowArgs) => {
-  const workflows = await payload.find({
-    collection: "workflows" as any, // workaround for Payload type union
-    where: {
-      targetCollection: {
-        equals: collection.slug,
-      },
-    },
-  });
+  if (!workflow?.steps || workflow.steps.length === 0) return
 
-  if (!workflows.docs.length) return;
+  // Determine current step index
+  const currentStepIndex = workflow.steps.findIndex(
+    (s: any) => s.stepName === doc.currentStep
+  )
 
-  const workflow: any = workflows.docs[0];
-  const step: any = workflow.steps?.[0];
+  // Determine next step
+  let nextStep = workflow.steps[0] // default first step
+  if (currentStepIndex >= 0 && currentStepIndex < workflow.steps.length - 1) {
+    nextStep = workflow.steps[currentStepIndex + 1]
+  }
 
-  if (!step) return;
-
-  await payload.create({
-    collection: "workflowLogs" as any,
+  // Update the blog's current step
+  await payload.update({
+    collection: "blogs",
+    id: doc.id,
     data: {
-      workflowId: workflow.id,
-      collection: collection.slug,
-      documentId: doc.id,
-      stepId: step.id,
-      action: "created",
+      currentStep: nextStep.stepName,
     },
-  });
+  })
 
-  console.log("Workflow step triggered");
-};
-
-export default triggerWorkflow;
+  // Log the workflow action
+  await payload.create({
+    collection: "workflowLogs",
+    data: {
+      workflow: doc.workflow,
+      documentId: doc.id,
+      collection: "blogs",
+      step: nextStep.stepName,
+      user: req?.user?.id || null,
+      action: doc.status || "updated",
+      comment: doc.comment || "",
+      assignedTo: doc.assignedReviewer || null,
+      timestamp: new Date().toISOString(), // ISO string
+    },
+  })
+}

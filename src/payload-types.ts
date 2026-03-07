@@ -196,7 +196,7 @@ export interface Workflow {
  */
 export interface WorkflowLog {
   id: string;
-  workflow?: (string | null) | Workflow;
+  workflow: string | Workflow;
   documentId: string;
   collection: string;
   step: string;
@@ -214,9 +214,30 @@ export interface WorkflowLog {
  */
 export interface Blog {
   id: string;
-  title?: string | null;
-  content?: string | null;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   amount?: number | null;
+  workflow?: (string | null) | Workflow;
+  currentStep?: string | null;
+  status?: ('draft' | 'review' | 'approved' | 'rejected') | null;
+  /**
+   * Assign a reviewer for this blog
+   */
+  assignedReviewer?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -390,9 +411,14 @@ export interface WorkflowLogsSelect<T extends boolean = true> {
  * via the `definition` "blogs_select".
  */
 export interface BlogsSelect<T extends boolean = true> {
+  id?: T;
   title?: T;
   content?: T;
   amount?: T;
+  workflow?: T;
+  currentStep?: T;
+  status?: T;
+  assignedReviewer?: T;
   updatedAt?: T;
   createdAt?: T;
 }
