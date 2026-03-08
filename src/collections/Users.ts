@@ -1,27 +1,51 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
 export const Users: CollectionConfig = {
-  slug: 'users',
-  auth: true, // Payload will automatically add email/password fields
+  slug: "users",
+  auth: true,
+
   admin: {
-    useAsTitle: 'email',
+    useAsTitle: "email",
   },
+
   fields: [
-    { name: 'name', type: 'text', required: true },
     {
-      name: 'role',
-      type: 'select',
-      options: ['admin', 'reviewer', 'editor'],
+      name: "name",
+      type: "text",
       required: true,
-      defaultValue: 'reviewer',
+    },
+    {
+      name: "role",
+      type: "select",
+      options: [
+        { label: "Admin", value: "admin" },
+        { label: "Reviewer", value: "reviewer" },
+        { label: "Editor", value: "editor" },
+      ],
+      required: true,
+      defaultValue: "reviewer",
     },
   ],
+
   access: {
     read: ({ req: { user } }) => {
-      if (!user) return false
-      return user.role === 'admin' ? true : { id: { equals: user.id } }
+      if (!user) return false;
+
+      // Admin can see all users
+      if (user.role === "admin") return true;
+
+      // Others can only see themselves
+      return {
+        id: {
+          equals: user.id,
+        },
+      };
     },
-    update: ({ req: { user } }) => user?.role === 'admin',
-    delete: ({ req: { user } }) => user?.role === 'admin',
+
+    update: ({ req: { user } }) => user?.role === "admin",
+
+    delete: ({ req: { user } }) => user?.role === "admin",
+
+    create: () => true,
   },
-}
+};

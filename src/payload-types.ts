@@ -176,13 +176,19 @@ export interface Media {
 export interface Workflow {
   id: string;
   name: string;
-  targetCollection: string;
+  targetCollection: ('blogs' | 'contracts')[];
   steps?:
     | {
         stepName: string;
         stepType: 'approval' | 'review' | 'sign-off' | 'comment-only';
         assignedRole: 'admin' | 'reviewer' | 'editor';
+        /**
+         * Example: amount > 10000
+         */
         condition?: string | null;
+        /**
+         * SLA time for this step in hours
+         */
         slaHours?: number | null;
         id?: string | null;
       }[]
@@ -200,11 +206,11 @@ export interface WorkflowLog {
   documentId: string;
   collection: string;
   step: string;
-  user?: (string | null) | User;
-  action: string;
+  action?: string | null;
   comment?: string | null;
-  timestamp?: string | null;
   assignedTo?: (string | null) | User;
+  user?: (string | null) | User;
+  timestamp?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -214,6 +220,7 @@ export interface WorkflowLog {
  */
 export interface Blog {
   id: string;
+  blogId?: string | null;
   title: string;
   content?: {
     root: {
@@ -231,7 +238,13 @@ export interface Blog {
     [k: string]: unknown;
   } | null;
   amount?: number | null;
+  /**
+   * Select the workflow for this blog
+   */
   workflow?: (string | null) | Workflow;
+  /**
+   * Current workflow step
+   */
   currentStep?: string | null;
   status?: ('draft' | 'review' | 'approved' | 'rejected') | null;
   /**
@@ -398,11 +411,11 @@ export interface WorkflowLogsSelect<T extends boolean = true> {
   documentId?: T;
   collection?: T;
   step?: T;
-  user?: T;
   action?: T;
   comment?: T;
-  timestamp?: T;
   assignedTo?: T;
+  user?: T;
+  timestamp?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -411,7 +424,7 @@ export interface WorkflowLogsSelect<T extends boolean = true> {
  * via the `definition` "blogs_select".
  */
 export interface BlogsSelect<T extends boolean = true> {
-  id?: T;
+  blogId?: T;
   title?: T;
   content?: T;
   amount?: T;

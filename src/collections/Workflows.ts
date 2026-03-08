@@ -1,31 +1,87 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from "payload";
 
 export const Workflows: CollectionConfig = {
-  slug: 'workflows',
-  admin: { useAsTitle: 'name' },
+  slug: "workflows",
+
+  admin: {
+    useAsTitle: "name",
+  },
+
+  access: {
+    read: ({ req: { user } }) => user?.role === "admin",
+    create: ({ req: { user } }) => user?.role === "admin",
+    update: ({ req: { user } }) => user?.role === "admin",
+    delete: ({ req: { user } }) => user?.role === "admin",
+  },
+
   fields: [
-    { name: 'name', type: 'text', required: true },
-    { name: 'targetCollection', type: 'text', required: true }, // e.g., 'blogs'
     {
-      name: 'steps',
-      type: 'array',
+      name: "name",
+      type: "text",
+      required: true,
+    },
+
+    {
+      name: "targetCollection",
+      type: "select",
+      hasMany: true,
+      required: true,
+      options: [
+        { label: "Blogs", value: "blogs" },
+        { label: "Contracts", value: "contracts" },
+      ],
+    },
+
+    {
+      name: "steps",
+      type: "array",
+
       fields: [
-        { name: 'stepName', type: 'text', required: true },
         {
-          name: 'stepType',
-          type: 'select',
-          options: ['approval', 'review', 'sign-off', 'comment-only'],
+          name: "stepName",
+          type: "text",
           required: true,
         },
+
         {
-          name: 'assignedRole',
-          type: 'select',
-          options: ['admin', 'reviewer', 'editor'],
+          name: "stepType",
+          type: "select",
           required: true,
+          options: [
+            { label: "Approval", value: "approval" },
+            { label: "Review", value: "review" },
+            { label: "Sign Off", value: "sign-off" },
+            { label: "Comment Only", value: "comment-only" },
+          ],
         },
-        { name: 'condition', type: 'text' },
-        { name: 'slaHours', type: 'number' },
+
+        {
+          name: "assignedRole",
+          type: "select",
+          required: true,
+          options: [
+            { label: "Admin", value: "admin" },
+            { label: "Reviewer", value: "reviewer" },
+            { label: "Editor", value: "editor" },
+          ],
+        },
+
+        {
+          name: "condition",
+          type: "text",
+          admin: {
+            description: "Example: amount > 10000",
+          },
+        },
+
+        {
+          name: "slaHours",
+          type: "number",
+          admin: {
+            description: "SLA time for this step in hours",
+          },
+        },
       ],
     },
   ],
-}
+};
