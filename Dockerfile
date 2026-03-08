@@ -1,49 +1,43 @@
-# Use Node Alpine image
+# ---------- Base image ----------
 FROM node:22-alpine AS base
-
 WORKDIR /app
 
-# Install dependencies
+# ---------- Install dependencies ----------
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json* ./
-
-# Use npm install instead of npm ci to avoid lock sync errors
 RUN npm install
 
-# Build stage
+# ---------- Build application ----------
 FROM base AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Disable telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Build Next.js project
 RUN npm run build
 
-# Production stage
+# ---------- Production runtime ----------
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-RUN addgroup -g 1001 nodejs
-RUN adduser -S nextjs -u 1001
+RUN addgroup -S nodejs
+RUN adduser -S nextjs
 
-# Copy public folder
+# Copy built app
 COPY --from=builder /app/public ./public
-
-# Copy standalone build
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["npm","start"]
